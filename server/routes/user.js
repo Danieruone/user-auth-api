@@ -1,6 +1,7 @@
 const express = require("express");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const _ = require("underscore");
 const app = express();
 
 app.get("/user", function (req, res) {
@@ -34,7 +35,26 @@ app.post("/user", function (req, res) {
 
 app.put("/user/:id", function (req, res) {
   let id = req.params.id;
-  res.json({ id });
+  // update this parameters
+  let body = _.pick(req.body, ["name", "email", "img", "role", "state"]);
+
+  User.findByIdAndUpdate(
+    id,
+    body,
+    { new: true, runValidators: true },
+    (err, userDB) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          err,
+        });
+      }
+      res.json({
+        ok: true,
+        user: userDB,
+      });
+    }
+  );
 });
 
 app.delete("/user", function (req, res) {
