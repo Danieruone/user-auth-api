@@ -5,7 +5,26 @@ const _ = require("underscore");
 const app = express();
 
 app.get("/user", function (req, res) {
-  res.json("get user");
+  let from = req.query.from || 0;
+  let limit = req.query.limit || 5;
+  User.find({ state: true }, "name email role google state img")
+    .skip(Number(from))
+    .limit(Number(limit))
+    .exec((err, users) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          err,
+        });
+      }
+      User.count({ state: true }, (err, count) => {
+        res.json({
+          ok: true,
+          users,
+          numberOfUsers: count,
+        });
+      });
+    });
 });
 
 app.post("/user", function (req, res) {
@@ -57,8 +76,34 @@ app.put("/user/:id", function (req, res) {
   );
 });
 
-app.delete("/user", function (req, res) {
-  res.json("deleter user");
+app.delete("/user/:id", function (req, res) {
+  let id = req.params.id;
+  // User.findByIdAndRemove(id, (err, deletedUser) => {
+  User.findByIdAndUpdate(
+    id,
+    { state: false },
+    { new: true },
+    (err, deletedUser) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          err,
+        });
+      }
+      if (!deletedUser) {
+        return res.status(400).json({
+          ok: false,
+          err: {
+            message: "user not found",
+          },
+        });
+      }
+      res.json({
+        ok: true,
+        deletedUser,
+      });
+    }
+  );
 });
 
 module.exports = app;
