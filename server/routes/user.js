@@ -2,9 +2,12 @@ const express = require("express");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const _ = require("underscore");
+// middlewares
+const { verifyToken } = require("../middlewares/authentication");
+
 const app = express();
 
-app.get("/user", function (req, res) {
+app.get("/user", verifyToken, function (req, res) {
   let from = req.query.from || 0;
   let limit = req.query.limit || 5;
   User.find({ state: true }, "name email role google state img")
@@ -44,7 +47,6 @@ app.post("/user", function (req, res) {
         err,
       });
     }
-    userDB.password = null;
     res.json({
       ok: true,
       user: userDB,
