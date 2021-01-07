@@ -44,7 +44,6 @@ app.post("/user", function (req, res) {
         err,
       });
     }
-    userDB.password = null;
     res.json({
       ok: true,
       user: userDB,

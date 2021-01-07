@@ -2,21 +2,21 @@ require("./config/config");
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-
-const { mongoURL } = require("./constants");
+var morgan = require("morgan");
 
 const app = express();
 
-// parse application/x-www-form-urlencoded
+// middlewares
+app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: false }));
-
-// parse application/json
 app.use(bodyParser.json());
 
-app.use(require("./routes/user"));
+// routes
+app.use(require("./routes/index"));
 
+// database
 mongoose.connect(
-  mongoURL,
+  process.env.MONGO_URL,
   { useNewUrlParser: true, useUnifiedTopology: true },
   (err, res) => {
     if (err) throw err;
@@ -24,6 +24,7 @@ mongoose.connect(
   }
 );
 
+// starting the server
 app.listen(process.env.PORT, () =>
-  console.log(`Escuchando puerto ${process.env.PORT}`)
+  console.log(`Listening port ${process.env.PORT}`)
 );
