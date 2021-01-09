@@ -3,7 +3,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const _ = require("underscore");
 // middlewares
-const { verifyToken } = require("../middlewares/authentication");
+const { verifyToken, verifyAdminRole } = require("../middlewares/authentication");
 
 const app = express();
 
@@ -30,7 +30,7 @@ app.get("/user", verifyToken, function (req, res) {
     });
 });
 
-app.post("/user", function (req, res) {
+app.post("/user", [verifyToken, verifyAdminRole], function (req, res) {
   let body = req.body;
 
   let user = new User({
@@ -54,7 +54,7 @@ app.post("/user", function (req, res) {
   });
 });
 
-app.put("/user/:id", function (req, res) {
+app.put("/user/:id", [verifyToken, verifyAdminRole], function (req, res) {
   let id = req.params.id;
   // update this parameters
   let body = _.pick(req.body, ["name", "email", "img", "role", "state"]);
@@ -78,7 +78,7 @@ app.put("/user/:id", function (req, res) {
   );
 });
 
-app.delete("/user/:id", function (req, res) {
+app.delete("/user/:id", [verifyToken, verifyAdminRole], function (req, res) {
   let id = req.params.id;
   // User.findByIdAndRemove(id, (err, deletedUser) => {
   User.findByIdAndUpdate(
