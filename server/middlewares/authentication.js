@@ -14,4 +14,18 @@ let verifyToken = (req, res, next) => {
   });
 };
 
-module.exports = { verifyToken };
+let verifyAdminRole = (req, res, next) => {
+  let user = req.user;
+  if (user.role === "ADMIN_ROLE") {
+    next();
+  } else {
+    return res.status(401).json({
+      ok: false,
+      err: {
+        message: "this role is not authorized",
+      },
+    });
+  }
+};
+
+module.exports = { verifyToken, verifyAdminRole };
